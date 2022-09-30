@@ -24,6 +24,8 @@ public class PlayerControl : MonoBehaviour
     public InputAction jump;
     public InputAction crouch;
 
+    public float debug1;
+
     private float sensitivityX = 8.0f;
     private float sensitivityY = 7.0f;
     private float timeCount = 0.0f;
@@ -38,7 +40,7 @@ public class PlayerControl : MonoBehaviour
     private GameObject headLook;
     private Quaternion rotationTo;
     private Quaternion rotationFrom;  
-    private CapsuleCollider playerCollider;
+    private CharacterController playerController;
 
     void Awake()
     {
@@ -60,7 +62,7 @@ public class PlayerControl : MonoBehaviour
         rotationTo = player.transform.rotation;
         maxSpeed = 10.0f;
         headLook.transform.eulerAngles = new Vector3(0, mainCamera.transform.eulerAngles.y,0);         
-        playerCollider = player.GetComponents<CapsuleCollider>()[0];
+        playerController = player.GetComponents<CharacterController>()[0];
     }
 
     // Update is called once per frame
@@ -101,15 +103,13 @@ public class PlayerControl : MonoBehaviour
             }
         }
 
-        if (animator.GetCurrentAnimatorStateInfo(0).IsTag("mjump")) {
+        if (animator.GetBool("IsJumping")) {
             if (!isColiding) {
-                player.transform.Translate(Vector3.forward * Time.deltaTime * playerVelocity);
-                playerSpeed = maxSpeed;
+                Vector3 playerForward = player.transform.TransformDirection(Vector3.forward);
+                playerController.Move(playerForward * Time.deltaTime * playerSpeed);
             }
         }
-
-        animator.SetFloat("Speed", playerSpeed);
-
+       animator.SetFloat("Speed", playerSpeed);
      }
 
     void LateUpdate()
